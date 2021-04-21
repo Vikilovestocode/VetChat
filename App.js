@@ -7,6 +7,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/HomeScreen';
 import ChatScreen from './screens/ChatScreen';
 import AddPetForm from './components/AddPetForm';
+import ConsultFormStepOne from './components/ConsultFormStepOne';
+import ConsultFormStepTwo from './components/ConsultFormStepTwo';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
@@ -40,7 +42,8 @@ export default function App() {
           <NavigationContainer>
             <Stack.Navigator>
               <Stack.Screen name="Home" component={HomeScreen} />
-              <Stack.Screen name="Details" component={AddPetForm} />
+              <Stack.Screen name="Details" component={ConsultFormStepOne} />
+              <Stack.Screen name="consultstep2" component={ConsultFormStepTwo} />
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider> 

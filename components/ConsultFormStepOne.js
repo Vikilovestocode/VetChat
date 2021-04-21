@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { TextInput, RadioButton, Checkbox, Avatar } from 'react-native-paper';
+import { TextInput, RadioButton, Checkbox, Avatar ,  Modal, Portal} from 'react-native-paper';
 import { Formik } from 'formik';
 import { Text, View, Button, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { FontAwesome } from '@expo/vector-icons'; 
 import dogProfile from'../assets/dogProfile.png';
 import  * as ImagePicker from 'expo-image-picker';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addPetRequest } from '../actions/consultAction';
 import { breedList } from '../constants/breedList';
 import SearchableDropdown from 'react-native-searchable-dropdown';
@@ -19,8 +19,12 @@ const validateForm = (values)=>{
         err.petName = 'Required'
     }
 
-    if(!values.age){
+    if(!values.years && !values.months){
         err.age = 'Required'
+    }
+
+    if(values.months && values.months>11){
+        err.age = 'Invalid Month'
     }
     
     if(!values.sex){
@@ -48,19 +52,31 @@ const validateForm = (values)=>{
 const ConsultFormStepOne = (props) => {
     const [petProfileImg, setPetProfileImg] = React.useState(null);
     const dispatch = useDispatch();
+    const consultReducer = useSelector(({consultReducer})=>{
+        return consultReducer
+    })
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
           allowsEditing: true,
           aspect: [4, 3],
         });
     
-        alert(result.uri);
         console.log(result)
     
         if (!result.cancelled) {
             setPetProfileImg({ uri :result.uri});
         }
       };
+
+      const [visible, setVisible] = React.useState(false);
+
+      const showModal = () => setVisible(true);
+      const hideModal = () => setVisible(false);
+      const containerStyle = {backgroundColor: 'white', padding: 10};
+      React.useEffect(()=>{
+        if(consultReducer.redirectToStep2)  
+             props.navigation.navigate('consultstep2')
+      },[consultReducer.redirectToStep2])
 
     return (
 
@@ -69,12 +85,65 @@ const ConsultFormStepOne = (props) => {
             validate={validateForm}
             onSubmit={values => {
                 console.log(values)
-                dispatch(addPetRequest())
+                if(petProfileImg && petProfileImg.uri){
+                    values.petProfileUri = petProfileImg.uri;
+                }
+                dispatch(addPetRequest(values))
                 }}>
 
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched, ...formik }) => (
 
                 <ScrollView style={{flex: 1}}>
+
+                    <Portal>
+                        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={containerStyle}>
+                            <SearchableDropdown
+                                onTextChange={(text) => console.log('on text select', text)}
+                                //On text change listner on the searchable input
+                                onItemSelect={(item) => {
+                                    hideModal()
+                                    formik.setFieldValue('breed', item, true)
+                                }}
+                                //onItemSelect called after the selection from the dropdown
+                                containerStyle={{ padding: 5 }}
+                                //suggestion container style
+                                textInputStyle={{
+                                    //inserted text style
+                                    padding: 12,
+                                    borderWidth: 1,
+                                    borderColor: '#ccc',
+                                    backgroundColor: '#FAF7F6',
+                                }}
+                                itemStyle={{
+                                    //single dropdown item style
+                                    padding: 10,
+                                    marginTop: 2,
+                                    backgroundColor: '#FAF9F8',
+                                    borderColor: '#bbb',
+                                    borderWidth: 1,
+                                }}
+                                itemTextStyle={{
+                                    //text style of a single dropdown item
+                                    color: '#222',
+                                }}
+                                itemsContainerStyle={{
+                                    //items container style you can pass maxHeight
+                                    //to restrict the items dropdown hieght
+                                    maxHeight: '50%',
+                                }}
+                                items={breedList}
+                                //mapping of item array
+                                //default selected item index
+                                placeholder="Type Breed name"
+                                //place holder for the search input
+                                resetValue={false}
+                                //reset textInput Value with true and false state
+                                underlineColorAndroid="transparent"
+                            //To remove the underline from the android input
+                            />
+                        </Modal>
+                    </Portal>
+   
                 <View >
                     <View style={styles.petavatar}>
                        <Avatar.Image size={150} source={petProfileImg? petProfileImg: dogProfile} />
@@ -123,20 +192,20 @@ const ConsultFormStepOne = (props) => {
                          keyboardType={"number-pad"}
                             mode= 'outlined'
                             label="Years"
-                            onChangeText={handleChange('age')}
-                            onBlur={handleBlur('age')}
-                            value={values.age}
-                            error={errors.age && touched.age}
+                            onChangeText={handleChange('years')}
+                            onBlur={handleBlur('years')}
+                            value={values.years}
+                            error={errors.years && touched.years}
                         />
                         <TextInput
                             style={{width: 150}}
                             keyboardType={"number-pad"}
                             mode= 'outlined'
                             label="Months"
-                            onChangeText={handleChange('age')}
-                            onBlur={handleBlur('age')}
-                            value={values.age}
-                            error={errors.age && touched.age}
+                            onChangeText={handleChange('months')}
+                            onBlur={handleBlur('months')}
+                            value={values.months}
+                            error={errors.months && touched.months}
                         />
                     </View>
                     <View style={styles.padding}>
@@ -167,6 +236,13 @@ const ConsultFormStepOne = (props) => {
                     </View>
                     <View style={{padding: 10, margin: 0 }}>
                      <Text>Breed</Text>
+                     <Pressable onPress={showModal}> 
+                     <View style={styles.breed}>
+                         <Text>{values.breed && values.breed.name?values.breed.name:"Click here to add"}</Text>
+                     </View>
+                    </Pressable>
+                     {/* <Button onPress={showModal} title={values.breed && values.breed.name?values.breed.name:"Click here to add"} /> */}
+
                         {/* <Picker
                             style={{ minHeight: 50}}
                             selectedValue={values.breed}
@@ -182,48 +258,7 @@ const ConsultFormStepOne = (props) => {
                             <Picker.Item label="mix" value="mix" />
                             <Picker.Item label="mix" value="mix" />
                         </Picker> */}
-            <SearchableDropdown
-          onTextChange={(text) => console.log('on text select',text)}
-          //On text change listner on the searchable input
-          onItemSelect={(item) => console.log('on item select',item)}
-          //onItemSelect called after the selection from the dropdown
-          containerStyle={{ padding: 5 }}
-          //suggestion container style
-          textInputStyle={{
-            //inserted text style
-            padding: 12,
-            borderWidth: 1,
-            borderColor: '#ccc',
-            backgroundColor: '#FAF7F6',
-          }}
-          itemStyle={{
-            //single dropdown item style
-            padding: 10,
-            marginTop: 2,
-            backgroundColor: '#FAF9F8',
-            borderColor: '#bbb',
-            borderWidth: 1,
-          }}
-          itemTextStyle={{
-            //text style of a single dropdown item
-            color: '#222',
-          }}
-          itemsContainerStyle={{
-            //items container style you can pass maxHeight
-            //to restrict the items dropdown hieght
-            maxHeight: '50%',
-          }}
-          items={breedList}
-          //mapping of item array
-          defaultIndex={2}
-          //default selected item index
-          placeholder="placeholder"
-          //place holder for the search input
-          resetValue={false}
-          //reset textInput Value with true and false state
-          underlineColorAndroid="transparent"
-          //To remove the underline from the android input
-        />
+           
                         { errors.breed && touched.breed?
                         (<Text style={{ color: 'red'}}>{errors.breed}</Text>): null}
                     </View>
@@ -243,9 +278,19 @@ const ConsultFormStepOne = (props) => {
     );
 };
 
+// backgroundColor: '#FAF9F8',
+// borderColor: '#bbb',
 
 const styles = StyleSheet.create ({
     padding:{ padding: 5},
+    breed:{
+        padding: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'green',
+        color: 'white'
+    },
     age:{
         padding: 10,
         flexDirection: 'row',
