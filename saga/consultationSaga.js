@@ -1,8 +1,9 @@
-import { put, takeLatest, all, call } from 'redux-saga/effects';
-import { ADD_PET_REQUEST, ADD_PET_SUCCESS, ADD_PET_FAILURE, 
+import * as firebase from 'firebase';
+import { put, takeLatest, takeEvery, all, call } from 'redux-saga/effects';
+import { ADD_PET_REQUEST, DEL_MEDIA_REQUEST, ADD_PET_FAILURE, 
     ADD_MEDIA_REQUEST, addMediaSuccess, addMediaFailure,
-    addPetSuccess, addPetFailure } from '../actions/consultAction';
-import { getConsultations, saveConsultationStep1, consultationImgUpload } from '../api/consultApi';
+    addPetSuccess, addPetFailure, addMediaUploadProgress, deleteMediaSuccess, deleteMediaFailure } from '../actions/consultAction';
+import { getConsultations, saveConsultationStep1, consultationImgUpload, deleteMedia } from '../api/consultApi';
 
 function* consultationSaga(action) {
     try{
@@ -16,16 +17,48 @@ function* consultationSaga(action) {
 export function* consultationWatcher() {
     yield takeLatest(ADD_PET_REQUEST, consultationSaga)
 }
+
+
   
 function* uploadMediaSaga({payload}) {
     try{
-        const data = yield call(() =>  consultationImgUpload(action.payload))
+        const data = yield call(() =>  consultationImgUpload(payload))
+        console.log(' upload media saga', data);
+        // data.on(firebase.storage.TaskEvent.STATE_CHANGED, function*(snapshot) {
+        //     let percent = snapshot.bytesTransferred / snapshot.totalBytes * 100;
+        //     console.log('api uploadTask progress:',percent + "% done");
+        //     // yield put(addMediaUploadProgress({pathUrl: payload.pathUrl, task: data, progressCnt: percent}))
+        //     progressCnt(payload.pathUrl, data, percent)
+        //   });
         yield put(addMediaSuccess({pathUrl: payload.pathUrl, task: data}))
     } catch(e){
-        yield put(addMediaFailure(data))
+        console.error('uploadMediaSaga:',e)
+        yield put(addMediaFailure(e))
     }
 }
 
 export function* uploadMediaWatcher() {
-    yield takeLatest(ADD_MEDIA_REQUEST, uploadMediaSaga)
+    yield takeEvery(ADD_MEDIA_REQUEST, uploadMediaSaga)
+}
+
+
+function* deleteMediaSaga({payload}) {
+    try{
+        const isDelted = yield call(() =>  deleteMedia(payload))
+        console.log(' isDelted media saga', isDelted);
+        // data.on(firebase.storage.TaskEvent.STATE_CHANGED, function*(snapshot) {
+        //     let percent = snapshot.bytesTransferred / snapshot.totalBytes * 100;
+        //     console.log('api uploadTask progress:',percent + "% done");
+        //     // yield put(addMediaUploadProgress({pathUrl: payload.pathUrl, task: data, progressCnt: percent}))
+        //     progressCnt(payload.pathUrl, data, percent)
+        //   });
+        yield put(deleteMediaSuccess({ pathUrl: payload.pathUrl, isDelted}))
+    } catch(e){
+        console.error(e)
+        yield put(deleteMediaFailure({ isDelted: false }))
+    }
+}
+
+export function* deleteMediaWatcher() {
+    yield takeEvery(DEL_MEDIA_REQUEST, deleteMediaSaga)
 }

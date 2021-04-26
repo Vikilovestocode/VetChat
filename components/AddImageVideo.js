@@ -2,18 +2,28 @@ import * as React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; 
 import PreviewImageVideo from './PreviewImageVideo';
-import  * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { addMediaRequest, deleteMediaRequest } from '../actions/consultAction';
 
 export default function AddImageVideo(props) {
-  const [media, setMedia] = React.useState([]);
+  const [media, setMedia] = React.useState({});
   const [count, setCount]  = React.useState(0);
-
-  const removePreview = (needToRemove)=>{
-    const newList = media.filter(ele => ele.uri != needToRemove.uri);
-    setMedia(newList)
-    setCount((prev)=>(prev-1));
+  const dispatch = useDispatch();
+  const { mediaTaskList } = useSelector(({ consultReducer })=>{
+     return consultReducer;
+  })
+  console.log('mediaTaskList mediaTaskList:',mediaTaskList)
+  const removePreview = ( mapKey )=>{
+    console.log('remove clcik', mapKey)
+    if(media[mapKey])
+    {
+      dispatch(deleteMediaRequest({pathUrl:mapKey}));
+      delete media[mapKey]
+      setMedia({...media})
+      setCount((prev) => (prev - 1));
+    }
+    
   }
 
   const addAudioVideo = async () => {
@@ -22,7 +32,12 @@ export default function AddImageVideo(props) {
     console.log(result)
 
     if (result.type !== 'cancel') {
-        setMedia((prev)=>([...prev, result]));
+       //props.
+        setMedia((prev)=>{
+          prev[props.uploadUrl+"/"+count+result.name] = result
+          return prev;
+        });
+        // dispatch(addMediaRequest({file: result, pathUrl:props.uploadUrl+"/"+count}));
         setCount((prev)=>(prev+1));
     }
   }
@@ -36,7 +51,8 @@ export default function AddImageVideo(props) {
         </TouchableOpacity>
       </View>}
       <View style={styles.previewContainer}>
-        {media.map(ele => (<PreviewImageVideo image={ele} removePreview={removePreview}/>))}
+        {Object.keys(media).map(key => 
+          (<PreviewImageVideo baseUrl={props.uploadUrl} fullPathUrl={key} image={media[key]} removePreview={removePreview}/>))}
       </View>
     </View>
   );

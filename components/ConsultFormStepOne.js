@@ -81,7 +81,7 @@ const ConsultFormStepOne = (props) => {
     return (
 
         <Formik
-            initialValues={{ petName: '', years: '', months: '', age: '', sex: '', weight: '', isAdopted: false,breed: 'js' }}
+            initialValues={{ petName: '', years: '', months: '', age: '', sex: '', weight: '', isAdopted: false, breed: '' }}
             validate={validateForm}
             onSubmit={values => {
                 console.log(values)

@@ -4,7 +4,6 @@ import { Formik } from 'formik';
 import { Text, View, Button, StyleSheet, Pressable, ScrollView } from 'react-native';
 import AudioRecord from './AudioRecord';
 import AudioPlayer from './AudioPlayer';
-import { Ionicons } from '@expo/vector-icons'; 
 import AddImageVideo from './AddImageVideo';
 
 
@@ -12,16 +11,16 @@ const validateForm = (values)=>{
     let err = {};
     
 
-    if(!values.petName){
-        err.petName = 'Required'
+    if(!values.ownerphone){
+        err.ownerphone = 'Required'
     }
 
-    if(!values.age){
-        err.age = 'Required'
+    if(!values.owneremail && !values.ownerphone){
+        err.owneremail = 'Required'
     }
     
-    if(!values.sex){
-        err.sex = 'Required'
+    if(!values.problemDesc){
+        err.problemDesc = 'Required'
     }
 
     if(!values.weight){
@@ -53,6 +52,7 @@ const ConsultFormStepTwo = (props) => {
         <Formik
             initialValues={{ ownerphone: '', owneremail: '',
                         problemDesc: '', vacnationimage: '', problemImage: [],  problemVideo:[]}}
+            validate={validateForm}            
             onSubmit={values => {
                 console.log(values)
                 
@@ -63,7 +63,6 @@ const ConsultFormStepTwo = (props) => {
                 <ScrollView style={{flex: 1}}>
 
                 <View >
-                    <Text> Hi This Step Two</Text>
                         <View style={styles.padding}>
 
                             <TextInput
@@ -109,14 +108,14 @@ const ConsultFormStepTwo = (props) => {
                                 (<Text style={{ color: 'red' }}>{errors.problemDesc}</Text>) : null}
                      </View>
                      <View style={styles.padding}>
-                     {recording? <AudioPlayer recording={recording} removeRecording={()=> (setRecording(null))}/>:
+                     {recording? <AudioPlayer recording={recording} uploadUrl={"consultaion/audio"} removeRecording={()=> (setRecording(null))}/>:
                       <AudioRecord recordCallback={recordCallback}/>}
                      </View>
                      <View style={styles.padding}>
-                        <AddImageVideo title={'Add Vaccination Card Image'} limit={1}/>      
+                        <AddImageVideo title={'Add Vaccination Card Image'} limit={1} uploadUrl={'vaccination'}/>      
                      </View>
                      <View style={styles.padding}>
-                        <AddImageVideo title={'Add Image/Video of Problem'} limit={3}/>      
+                        <AddImageVideo title={'Add Image/Video of Problem'} limit={3} uploadUrl={'someurl'}/>      
                      </View>
                     <View style={styles.padding}>
                      <Button onPress={handleSubmit} title="Submit" />
