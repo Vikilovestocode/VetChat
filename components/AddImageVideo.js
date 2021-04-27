@@ -13,11 +13,12 @@ export default function AddImageVideo(props) {
   const { mediaTaskList } = useSelector(({ consultReducer })=>{
      return consultReducer;
   })
-  console.log('mediaTaskList mediaTaskList:',mediaTaskList)
   const removePreview = ( mapKey )=>{
     console.log('remove clcik', mapKey)
     if(media[mapKey])
     {
+      if(props.removeVideoImageClbk)
+         props.removeVideoImageClbk(mapKey)
       dispatch(deleteMediaRequest({pathUrl:mapKey}));
       delete media[mapKey]
       setMedia({...media})
@@ -32,7 +33,9 @@ export default function AddImageVideo(props) {
     console.log(result)
 
     if (result.type !== 'cancel') {
-       //props.
+        if(props.addVideoImageClbk){
+          props.addVideoImageClbk(props.uploadUrl+"/"+count+result.name)
+        }
         setMedia((prev)=>{
           prev[props.uploadUrl+"/"+count+result.name] = result
           return prev;

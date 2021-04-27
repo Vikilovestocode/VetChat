@@ -44,6 +44,7 @@ export default function AudioPlayer(props) {
  const dispatch = useDispatch();
  const removeRec = ()=> {
   dispatch(deleteMediaRequest({pathUrl: props.uploadUrl}))
+ if(props.removeRecording)
   props.removeRecording();
  }
 
