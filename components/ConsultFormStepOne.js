@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addPetRequest } from '../actions/consultAction';
 import { breedList } from '../constants/breedList';
 import SearchableDropdown from 'react-native-searchable-dropdown';
+import { ModalList } from './ModalList';
 
 const validateForm = (values)=>{
     let err = {};
@@ -97,7 +98,7 @@ const ConsultFormStepOne = (props) => {
 
                     <Portal>
                         <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={containerStyle}>
-                            <SearchableDropdown
+                            {/* <SearchableDropdown
                                 onTextChange={(text) => console.log('on text select', text)}
                                 //On text change listner on the searchable input
                                 onItemSelect={(item) => {
@@ -123,6 +124,7 @@ const ConsultFormStepOne = (props) => {
                                     borderWidth: 1,
                                 }}
                                 itemTextStyle={{
+
                                     //text style of a single dropdown item
                                     color: '#222',
                                 }}
@@ -140,7 +142,11 @@ const ConsultFormStepOne = (props) => {
                                 //reset textInput Value with true and false state
                                 underlineColorAndroid="transparent"
                             //To remove the underline from the android input
-                            />
+                            /> */}
+                            <ModalList inputList={breedList} title={'Type Breed name'} onSelect={(item) => {
+                                    hideModal()
+                                    formik.setFieldValue('breed', item, true)
+                                }}/>
                         </Modal>
                     </Portal>
    
@@ -152,7 +158,6 @@ const ConsultFormStepOne = (props) => {
                        </Pressable>
                     </View>
                     <View style={styles.padding}>
-
                         <TextInput
                             mode= 'outlined'
                             label="Pet Name"

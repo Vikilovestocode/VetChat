@@ -25,7 +25,7 @@ export default function HomeScreen({ navigation }) {
       <Text>Home Screen</Text>
       <Button
         title="Consultation"
-        onPress={() => navigation.navigate('consultstep2')}
+        onPress={() => navigation.navigate('Details')}
       />
     </View>
   );
