@@ -1,9 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Text, View, Button, KeyboardAvoidingView } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat'
+import { Portal, Modal } from 'react-native-paper';
 import { renderInputToolbar, renderActions, renderComposer, renderSend } from '../components/InputToolBar';
+import { FontAwesome } from '@expo/vector-icons'; 
+import { AUDIO_MSG_MODE } from '../constants/chatConstants';
+import AudioRecord from '../components/AudioRecord';
 
 export default function ChatScreen({ navigation }) {
+  // 
   const chatBotMsg = [
     {
       _id:  1,
@@ -68,9 +73,26 @@ export default function ChatScreen({ navigation }) {
       avatar: 'https://placeimg.com/140/140/any',
     },
     isChatbotMsg: true,
-    isAnswerd: false
+    isAnswerd: false,
+    received: true
+  }, {
+    _id:  2,
+    step: 1,
+    text: `Hi, Lika
+    `,
+    createdAt: new Date(),
+    user: {
+      _id: 1,
+    },
+    isChatbotMsg: true,
+    isAnswerd: false,
+    received: true
   }]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [visible, setVisible] = React.useState(false);
+  const [modalMode, setModalMode] = React.useState('');
+  const hideModal = ()=>(setVisible(false));
+  const [audioMsg, setAudioMsg] = React.useState('');
 
 
   useEffect(() => {
@@ -82,39 +104,82 @@ export default function ChatScreen({ navigation }) {
     //   const nexStep = chatBotMsg.find(ele => ele.step == currentStep+1);
     //   setMessages(previousMessages => GiftedChat.append(previousMessages, nexStep))
     // }
+
     
   }, [])
  
   const onSend = useCallback((inpMsg = []) => {
 
-    // const msg = inpMsg.map(ele => {
-    //   if(ele.step == currentStep)
-    //   {
-    //     ele.isAnswerd = true;
-    //     return ele;
-    //   }   
-    //   return ele;   
-    // })
-    const idx = chatBotMsg.findIndex(ele => ele.step == currentStep);
-    chatBotMsg[idx].answer = inpMsg;
-
-    const obj = GiftedChat.append(previousMessages, inpMsg)
-  
-    const nexStep = chatBotMsg.find(ele => ele.step == currentStep+1);
-    setCurrentStep(currentStep+1)
-    setMessages(previousMessages => GiftedChat.append(obj, nexStep))
-    console.log(' messages ', messages)
+    console.log(' messages ', inpMsg)
+    setMessages(previousMessages => GiftedChat.append(previousMessages, inpMsg))
   }, [])
+
+  const getAudioMsgComp = () =>{
+    const startRecord = () => (
+      <View > 
+      <View style={{ alignSelf: 'center'}}> 
+        <FontAwesome name="microphone" size={60} color="black" />
+      </View>
+      <View style={{ alignSelf:'center'}}>
+        <Text>Tap to record</Text>
+      </View>
+      </View>
+    )
+
+    const recordingIcon = () => (
+      <View > 
+      <View style={{ alignSelf: 'center'}}> 
+        <FontAwesome name="microphone" size={60} color="green" />
+      </View>
+      <View style={{ alignSelf:'center'}}>
+        <Text>Recording...</Text>
+      </View>
+      </View>
+    )
+
+    return (
+      <>
+      <AudioRecord startRecordIcon={startRecord} recordingIcon={recordingIcon} recordCallback={recordCallback}/>
+      </>
+     
+    );
+  }
  
+  const recordCallback =(recording)=>{
+    hideModal()
+    setAudioMsg(recording)
+  }
   return (
     <>
+     <Portal>
+       <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={ {backgroundColor: 'white', padding: 10}}>
+        {modalMode==AUDIO_MSG_MODE && getAudioMsgComp()}
+       </Modal>
+     </Portal>
     <GiftedChat
+      audioMsg={audioMsg}
       messages={messages}
       onSend={messages => onSend(messages)}
       user={{
         _id: 1,
       }}
       renderInputToolbar={renderInputToolbar}
+      actionList={
+        {
+          'Choose File form': () => {
+            console.log('Choose From Library');
+            setVisible(true)
+          },
+          'Record Audio': () => {
+            console.log('Record Audio');
+            setVisible(true)
+            setModalMode(AUDIO_MSG_MODE)
+          },
+          Cancel: () => {
+            console.log('Cancel');
+          },
+        }
+      }
       renderActions={renderActions}
       renderComposer={renderComposer}
       renderSend={renderSend}

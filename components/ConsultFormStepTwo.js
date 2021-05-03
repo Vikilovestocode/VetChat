@@ -5,8 +5,12 @@ import { Text, View, Button, StyleSheet, Pressable, ScrollView } from 'react-nat
 import AudioRecord from './AudioRecord';
 import AudioPlayer from './AudioPlayer';
 import AddImageVideo from './AddImageVideo';
+import { addPetRequest } from '../actions/consultAction';
+import { useDispatch, useSelector } from 'react-redux';
+import { addConsltStep2Request } from '../actions/consultAction';
+import { consultationImgUpload } from '../api/consultApi';
 
-
+const CONSULTATION = 'consultation';
 const validateForm = (values)=>{
     let err = {};
     
@@ -30,32 +34,56 @@ const validateForm = (values)=>{
 
 }
 
-const audioUrl = (base)=>(`${base}\audio`)
+const audioUrl = (base)=>(`${base}/audio`)
 
 const ConsultFormStepTwo = (props) => {
     const [recording, setRecording] = React.useState(null);
+    const dispatch = useDispatch();
+    let { consultationObj } = useSelector(({consultReducer})=>{
+        return consultReducer
+    })
 
- 
    
     return (
         <Formik
             initialValues={{ ownerphone: '', owneremail: '',
-                        problemDesc: '', audio:'', vacnationimage: '', problemImageVideo: [],
+                        problemDesc: '', audio:'', vacnationImage: '', problemImageVideo: [], problemImages: [], problemVideos: [],
                         isLaziness: '', isVomitting:'', isDiarrhoea: '',diarrhoeaPerDay: '',  vomittingPerDay: ''}}
             validate={validateForm}            
             onSubmit={values => {
-                alert(JSON.stringify(values, null, 4))
+                // alert(JSON.stringify(values, null, 4))
                 console.log(JSON.stringify(values, null, 4))
-                
+                dispatch(addConsltStep2Request({...values, id: consultationObj.id}))
                 }}>
 
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched, ...formik }) => {
 
                 const recordCallback = (record) => {
-                    formik.setFieldValue('audio', audioUrl(''), true)
+                    formik.setFieldValue('audio', audioUrl(CONSULTATION+`/${consultationObj.id}`), true)
+                    consultationImgUpload({file: record, pathUrl: audioUrl(CONSULTATION+`/${consultationObj.id}`)})
                     setRecording(record);
                 }
 
+                const addVideoImageClbk = (url)=>{
+                    console.log('addVideoImageClbk', url)
+                    formik.setFieldValue('problemImageVideo', [...values.problemImageVideo, url], true)
+                    
+                    if(url.includes('image')){
+                            formik.setFieldValue('problemImages', [...values.problemImages, url], true)
+                    } else {
+                        formik.setFieldValue('problemVideos', [...values.problemVideos, url], true)
+                    }
+                }
+
+               const removeVideoImageClbk = (url)=>{
+                    console.log('removeVideoImageClbk', url)
+                    formik.setFieldValue('problemImageVideo', values.problemImageVideo.filter(ele => ele != url), true)
+                    if(url.includes('image')){
+                        formik.setFieldValue('problemImages', values.problemImages.filter(ele => ele != url), true)
+                    } else {
+                        formik.setFieldValue('problemVideos', values.problemVideos.filter(ele => ele != url), true)
+                    }
+            }
 
                 return (
                     <>
@@ -83,7 +111,6 @@ const ConsultFormStepTwo = (props) => {
                                     <TextInput
                                         mode='outlined'
                                         label="Owner Email"
-                                        keyboardType={"number-pad"}
                                         onChangeText={handleChange('owneremail')}
                                         onBlur={handleBlur('owneremail')}
                                         value={values.owneremail}
@@ -108,7 +135,7 @@ const ConsultFormStepTwo = (props) => {
                                         (<Text style={{ color: 'red' }}>{errors.problemDesc}</Text>) : null}
                                 </View>
                                  <View style={styles.padding}>
-                                    {recording ? <AudioPlayer recording={recording} uploadUrl={"consultaion/audio"} removeRecording={() => (setRecording(null))} /> :
+                                    {recording ? <AudioPlayer recording={recording} uploadUrl={audioUrl(CONSULTATION+`/${consultationObj.id}`)} removeRecording={() => (setRecording(null))} /> :
                                         <AudioRecord recordCallback={recordCallback} />}
                                 </View>
                                 <View>
@@ -154,12 +181,14 @@ const ConsultFormStepTwo = (props) => {
                                     />
                                 </View>
                                 <View style={styles.padding}>
-                                    <AddImageVideo title={'Add Vaccination Card Image'} limit={1} uploadUrl={'vaccination'} />
+                                    <AddImageVideo title={'Add Vaccination Card Image'} limit={1} uploadUrl={CONSULTATION+`/${consultationObj.id}`+'/vaccination'} 
+                                                                            addVideoImageClbk={(url) => (formik.setFieldValue('vacnationImage', url, true))}
+                                                                            removeVideoImageClbk={(url) => (formik.setFieldValue('vacnationImage', '', true))} />
                                 </View>
                                 <View style={styles.padding}>
-                                    <AddImageVideo title={'Add Image/Video of Problem'} limit={3} uploadUrl={'someurl'}
-                                        removeVideoImageClbk={(url) => (formik.setFieldValue('problemImageVideo', values.problemImageVideo.filter(ele => ele != url), true))}
-                                        addVideoImageClbk={(url) => (formik.setFieldValue('problemImageVideo', [...values.problemImageVideo, url], true))} />
+                                    <AddImageVideo title={'Add Image/Video of Problem'} limit={3} uploadUrl={CONSULTATION+`/${consultationObj.id}`}
+                                        removeVideoImageClbk={removeVideoImageClbk}
+                                        addVideoImageClbk={addVideoImageClbk} />
                                     {errors.problemImageVideo && touched.problemImageVideo ?
                                         (<Text style={{ color: 'red' }}>{errors.problemImageVideo}</Text>) : null}
                                 </View>

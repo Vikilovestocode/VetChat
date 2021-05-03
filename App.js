@@ -44,6 +44,7 @@ export default function App() {
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Details" component={ConsultFormStepOne} />
               <Stack.Screen name="consultstep2" component={ConsultFormStepTwo} />
+              <Stack.Screen name="chatScreen" component={ChatScreen} />
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider> 

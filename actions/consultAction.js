@@ -8,6 +8,14 @@ export const addPetRequest = actionCreatorPayload(ADD_PET_REQUEST);
 export const addPetSuccess = actionCreatorPayload(ADD_PET_SUCCESS);
 export const addPetFailure = actionCreatorPayload(ADD_PET_FAILURE);
 
+export const ADD_STEP2_REQUEST = 'ADD_STEP2_REQUEST';
+export const ADD_STEP2_SUCCESS = 'ADD_STEP2_SUCCESS';
+export const ADD_STEP2_FAILURE = 'ADD_STEP2_FAILURE';
+
+export const addConsltStep2Request = actionCreatorPayload(ADD_STEP2_REQUEST);
+export const addConsltStep2Success = actionCreatorPayload(ADD_STEP2_SUCCESS);
+export const addConsltStep2Failure = actionCreatorPayload(ADD_STEP2_FAILURE);
+
 
 export const ADD_MEDIA_REQUEST = 'ADD_MEDIA_REQUEST';
 export const ADD_MEDIA_SUCCESS = 'ADD_MEDIA_SUCCESS';

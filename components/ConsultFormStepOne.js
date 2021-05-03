@@ -9,8 +9,11 @@ import  * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { addPetRequest } from '../actions/consultAction';
 import { breedList } from '../constants/breedList';
-import SearchableDropdown from 'react-native-searchable-dropdown';
+// import SearchableDropdown from 'react-native-searchable-dropdown';
 import { ModalList } from './ModalList';
+import { consultationImgUpload } from '../api/consultApi';
+
+
 
 const validateForm = (values)=>{
     let err = {};
@@ -66,6 +69,7 @@ const ConsultFormStepOne = (props) => {
     
         if (!result.cancelled) {
             setPetProfileImg({ uri :result.uri});
+            consultationImgUpload({file: result, pathUrl: 'pet'})
         }
       };
 
@@ -243,7 +247,7 @@ const ConsultFormStepOne = (props) => {
                      <Text>Breed</Text>
                      <Pressable onPress={showModal}> 
                      <View style={styles.breed}>
-                         <Text>{values.breed && values.breed.name?values.breed.name:"Click here to add"}</Text>
+                         <Text style={{color: 'white'}}>{values.breed && values.breed.name?values.breed.name:"Click here to add"}</Text>
                      </View>
                     </Pressable>
                      {/* <Button onPress={showModal} title={values.breed && values.breed.name?values.breed.name:"Click here to add"} /> */}

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import PreviewImageVideo from './PreviewImageVideo';
 import * as DocumentPicker from 'expo-document-picker';
 import { useDispatch, useSelector } from 'react-redux';
+import * as mime from 'react-native-mime-types';
 import { addMediaRequest, deleteMediaRequest } from '../actions/consultAction';
 
 export default function AddImageVideo(props) {
@@ -18,7 +19,7 @@ export default function AddImageVideo(props) {
     if(media[mapKey])
     {
       if(props.removeVideoImageClbk)
-         props.removeVideoImageClbk(mapKey)
+         props.removeVideoImageClbk(mapKey, media[mapKey])
       dispatch(deleteMediaRequest({pathUrl:mapKey}));
       delete media[mapKey]
       setMedia({...media})
@@ -33,30 +34,53 @@ export default function AddImageVideo(props) {
     console.log(result)
 
     if (result.type !== 'cancel') {
-        if(props.addVideoImageClbk){
-          props.addVideoImageClbk(props.uploadUrl+"/"+count+result.name)
+        const fileType = mime.lookup(result.uri);
+        let fileUrl = '';
+        console.log(' addAudioVideo ', result, fileType)
+        if(fileType.includes('image') || fileType.includes('video')){
+          if(props.addVideoImageClbk){
+            if(fileType.includes('image')){
+              fileUrl = props.uploadUrl+"/image/"+count+result.name;
+            }
+
+            if(fileType.includes('video')){
+              fileUrl = props.uploadUrl+"/video/"+count+result.name;
+            }
+            props.addVideoImageClbk(fileUrl)
+
+          }
+          setMedia((prev)=>{
+            prev[fileUrl] = result
+            return prev;
+          });
+          // dispatch(addMediaRequest({file: result, pathUrl:props.uploadUrl+"/"+count}));
+          setCount((prev)=>(prev+1));
+        } else {
+          alert("File type "+result.name+" not allowed")
         }
-        setMedia((prev)=>{
-          prev[props.uploadUrl+"/"+count+result.name] = result
-          return prev;
-        });
-        // dispatch(addMediaRequest({file: result, pathUrl:props.uploadUrl+"/"+count}));
-        setCount((prev)=>(prev+1));
     }
   }
 
+  // if you pass uploadIcon then no preview available but u get upload img in 
+  // addVideoImageClbk
+
   return (
     <View style={styles.container}>
-     { (count <= props.limit-1) && <View style={styles.addContainer}>
-        <TouchableOpacity style={styles.button} onPress={addAudioVideo}>
-          <Text style={styles.addLable}>{props.title}</Text>
-          <Ionicons name="add-sharp" size={24} color="black" />
-        </TouchableOpacity>
-      </View>}
-      <View style={styles.previewContainer}>
+     {(props.uploadIcon?  props.uploadIcon:
+       (count <= props.limit-1) && <View style={styles.addContainer}>
+       <TouchableOpacity style={styles.button} onPress={addAudioVideo}>
+         <Text style={styles.addLable}>{props.title}</Text>
+         <Ionicons name="add-sharp" size={24} color="black" />
+       </TouchableOpacity>
+     </View>
+      )}
+      {
+        (!props.uploadIcon ?
+        <View style={styles.previewContainer}>
         {Object.keys(media).map(key => 
           (<PreviewImageVideo baseUrl={props.uploadUrl} fullPathUrl={key} image={media[key]} removePreview={removePreview}/>))}
-      </View>
+        </View> : null)
+      }
     </View>
   );
 }

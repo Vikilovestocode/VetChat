@@ -24,21 +24,27 @@ export function getConsultations(){
 }
 
 
-export function saveConsultationStep1(payload){
-    console.log('saveConsultationStep1', payload);
+export async function saveConsultationStep1(payload){
+    console.log('saveConsultationStep1');
 
-    const consultations = firebase.firestore().collection("consultations")
-    .doc().set(payload);
-    // consultations.get().then((doc) => {
-    //     if (doc.exists) {
-    //         console.log("Document data:", doc.data());
-    //     } else {
-    //         // doc.data() will be undefined in this case
-    //         console.log("No such document!");
-    //     }
-    // }).catch((error) => {
-    //     console.log("Error getting document:", error);
-    // });
+    const consultations = await firebase.firestore().collection("consultations").add(payload);
+
+    console.log('saveConsultationStep1 #######', consultations);
+
+    return consultations
+
+
+}
+
+export async function saveConsultationStepTwo(payload){
+    console.log('saveConsultationStepTwo');
+
+    await firebase.firestore().collection("consultations").doc(payload.id)
+    .update(payload);
+
+    console.log('saveConsultationStep222222 #######', consultations);
+
+    return payload
 
 
 }
@@ -56,18 +62,24 @@ function * progressCnt(pathUrl, data, percent){
 }
 
 async function getDocUrl(file){
-    const response = await fetch(file.uri);
+    console.log('getDocUrl:::', file.uri)
+    console.log('getDocUrl:file.getURI()::', file.getURI)
+    const response = await fetch(file.uri? file.uri :file.getURI());
     const blob = await response.blob();
     return blob;
 }
- function uploadImage(file, pathUrl) {
-    // Create the file metadata
-    const metadata = {
+ async function uploadImage(file, pathUrl) {
+   try{
+
+     // Create the file metadata
+     const metadata = {
         contentType: 'image/*'
     };
 
+    const data = await getDocUrl(file);
+
     // Upload file and metadata to the object 'images/mountains.jpg'
-    const uploadTask =  firebase.storage().ref().child(pathUrl).put(getDocUrl(file));
+    const uploadTask =  firebase.storage().ref().child(pathUrl).put(data);
     // Pause the upload
     // uploadTask.pause();
     // uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, function(snapshot) {
@@ -75,8 +87,12 @@ async function getDocUrl(file){
     //     console.log('uploadTask uploadTask progress:',percent + "% done");
     //     progressCnt(pathUrl, uploadTask, percent)
     //   });
-   console.log('#### upload image ##', uploadTask);
    return uploadTask;
+
+   } catch(e){
+    console.log('#### upload image error ##', e);
+
+   }
 }
 
 export async function deleteMedia(payload){

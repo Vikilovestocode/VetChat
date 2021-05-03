@@ -4,7 +4,7 @@ import { DEL_MEDIA_SUCCESS, DEL_MEDIA_FAILURE}  from '../actions/consultAction';
 
 // Initial State
 const initialState = {
-
+  consultationObj : { id : 'xJrCL8P4BUOe3f4wxO36'} 
   };// Reducers (Modifies The State And Returns A New State)
   const consultReducer = (state = initialState, action) => {
     console.log(' consult reducer', action.type);
@@ -14,7 +14,8 @@ const initialState = {
         return {
           ...state,
           redirectToStep2: true,
-          errorFlag: false
+          errorFlag: false,
+          consultationObj: action.payload
         }
       }
       case ADD_PET_FAILURE: {

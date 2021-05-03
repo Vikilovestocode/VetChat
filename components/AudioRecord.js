@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
 
 export default function AudioRecord(props) {
@@ -32,15 +32,22 @@ export default function AudioRecord(props) {
     console.log('Recording stopped and stored at', uri);
     props.recordCallback(recording)
   }
-
+    console.log('props.recordingIcon::::', props.startRecordIcon)
 
 
   return (
-    <View style={styles.container}>
-      <Button
+    <View style={(props.startRecordIcon? {}: styles.container)}>
+      { props.startRecordIcon ? (
+        <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
+        {(recording? <props.recordingIcon/> : <props.startRecordIcon/>)}
+        </TouchableOpacity>
+      ):(
+        <Button
         title={recording ? 'Stop Audio Recording' : 'Start Audio Recording'}
         onPress={recording ? stopRecording : startRecording}
       />
+      )}
+      
     </View>
   );
 }

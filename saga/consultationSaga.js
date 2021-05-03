@@ -3,19 +3,36 @@ import { put, takeLatest, takeEvery, all, call } from 'redux-saga/effects';
 import { ADD_PET_REQUEST, DEL_MEDIA_REQUEST, ADD_PET_FAILURE, 
     ADD_MEDIA_REQUEST, addMediaSuccess, addMediaFailure,
     addPetSuccess, addPetFailure, addMediaUploadProgress, deleteMediaSuccess, deleteMediaFailure } from '../actions/consultAction';
-import { getConsultations, saveConsultationStep1, consultationImgUpload, deleteMedia } from '../api/consultApi';
+import { ADD_STEP2_REQUEST, addConsltStep2Success, addConsltStep2Failure } from '../actions/consultAction';
+import { getConsultations, saveConsultationStep1,  consultationImgUpload, deleteMedia, saveConsultationStepTwo } from '../api/consultApi';
 
 function* consultationSaga(action) {
     try{
-        const data = yield call(() =>  saveConsultationStep1(action.payload))
+        const data = yield call(saveConsultationStep1, action.payload)
+        console.log('##### consultationSaga #', data)
         yield put(addPetSuccess(data))
     } catch(e){
-        yield put(addPetFailure(data))
+        console.log('addPetFailure',e)
+        yield put(addPetFailure(e))
     }
 }
 
 export function* consultationWatcher() {
     yield takeLatest(ADD_PET_REQUEST, consultationSaga)
+}
+
+
+function* consultationSagaStepTwo(action) {
+    try{
+        const data = yield call(saveConsultationStepTwo, action.payload)
+        yield put(addConsltStep2Success(data))
+    } catch(e){
+        yield put(addConsltStep2Failure(e))
+    }
+}
+
+export function* consultationStep2Watcher() {
+    yield takeLatest(ADD_STEP2_REQUEST, consultationSagaStepTwo)
 }
 
 
