@@ -15,7 +15,7 @@ export default function AudioRecord(props) {
       }); 
       console.log('Starting recording..');
       const recording = new Audio.Recording();
-      await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+      await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_LOW_QUALITY);
       await recording.startAsync(); 
       setRecording(recording);
       console.log('Recording started');

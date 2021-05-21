@@ -1,10 +1,20 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
-import { Image, Button, View } from 'react-native';
+import { Image, Button, View, Text } from 'react-native';
 import { InputToolbar, Actions, Composer, Send } from 'react-native-gifted-chat';
 import { Ionicons } from '@expo/vector-icons'; 
 import AudioPlayer from './AudioPlayer';
+import VideoPlayer from './VideoPlayer';
+
+import {
+  MessageText,
+  MessageImage,
+  Time,
+  utils,
+} from 'react-native-gifted-chat'
+import ChatAudioRender from './ChatAudioRender';
+import ChatVideoRender from './ChatVideoRender';
 
 
 
@@ -54,10 +64,6 @@ export const renderActions = (props) =>{
 
 export const renderComposer = (props) => {
   
-  if(props.audioMsg){
-    return <AudioPlayer recording={props.audioMsg} removeRecording={()=>{}} />
-  }
-
   return (
     <Composer
       {...props}
@@ -90,3 +96,41 @@ export const renderSend = (props) => (
     
   </Send>
 );
+
+export const renderMessageVideo  =(props) =>{
+  console.log('renderMessageVideo-------')
+  if(props.currentMessage && props.currentMessage.video){
+    // return ( <VideoPlayer uri={props.currentMessage.video}/>)
+    return (<ChatVideoRender { ...props }/>);
+  }
+
+  // return ( <MessageText {...props} /> )
+   
+}
+
+export const renderMessageAudio  =(props) =>{
+  console.log('renderMessageAudio-------is audio::', !!props.currentMessage.audio)
+
+  console.log('renderMessageAudio-------is audio:txt:', props.currentMessage.text)
+  if(props.currentMessage && props.currentMessage.audio){
+    // return <AudioPlayer recording={props.currentMessage.audio} />
+    return (<ChatAudioRender { ...props }/>);
+    // return <Text>audio</Text>
+  }
+
+  // return ( <MessageText {...props} /> )
+   
+}
+
+export const renderMessage  =(props) =>{
+  console.log(' renderMessage calling')
+
+  // if(props.currentMessage && props.currentMessage.video){
+  //   return ( <VideoPlayer/>)
+  // } else
+  //  if(props.currentMessage && props.currentMessage.audio){
+  //   return <AudioPlayer recording={props.audioMsg} />
+  // }
+
+  return ( <MessageText {...props} /> )
+}

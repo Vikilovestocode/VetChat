@@ -35,3 +35,42 @@ export const DEL_MEDIA_FAILURE = 'DEL_MEDIA_FAILURE';
 export const deleteMediaRequest = actionCreatorPayload(DEL_MEDIA_REQUEST);
 export const deleteMediaSuccess = actionCreatorPayload(DEL_MEDIA_SUCCESS);
 export const deleteMediaFailure = actionCreatorPayload(DEL_MEDIA_FAILURE);
+
+export const SAVE_CHAT_MSG_REQUEST = 'SAVE_CHAT_MSG_REQUEST';
+export const SAVE_CHAT_MSG_SUCCESS = 'SAVE_CHAT_MSG_SUCCESS';
+export const SAVE_CHAT_MSG_FAILURE = 'SAVE_CHAT_MSG_FAILURE';
+
+export const saveChatMsgRequest = actionCreatorPayload(SAVE_CHAT_MSG_REQUEST);
+export const saveChatMsgSuccess = actionCreatorPayload(SAVE_CHAT_MSG_SUCCESS);
+export const saveChatMsgFailure = actionCreatorPayload(SAVE_CHAT_MSG_FAILURE);
+
+
+export const MEDIA_LOCALLY_REQUEST = 'MEDIA_LOCALLY_REQUEST';
+export const MEDIA_LOCALLY_SUCCESS = 'MEDIA_LOCALLY_SUCCESS';
+export const MEDIA_LOCALLY_FAILURE = 'MEDIA_LOCALLY_FAILURE';
+
+export const keepMeidaLocallyReq = actionCreatorPayload(MEDIA_LOCALLY_REQUEST);
+export const keepMeidaLocallySuccess = actionCreatorPayload(MEDIA_LOCALLY_SUCCESS);
+export const keepMeidaLocallyFailure = actionCreatorPayload(MEDIA_LOCALLY_FAILURE);
+
+
+export const GET_CHATMSG_REQUEST = 'GET_CHATMSG_REQUEST';
+export const GET_CHATMSG_SUCCESS = 'GET_CHATMSG_SUCCESS';
+export const GET_CHATMSG_FAILURE = 'GET_CHATMSG_FAILURE';
+
+export const getChatMessageReq = actionCreatorPayload(GET_CHATMSG_REQUEST);
+export const getChatMessageSuccess = actionCreatorPayload(GET_CHATMSG_SUCCESS);
+export const getChatMessageFailure = actionCreatorPayload(GET_CHATMSG_FAILURE);
+
+export const SEND_CHATMSG = 'SEND_CHATMSG';
+
+export const sendChatMsg = actionCreatorPayload(SEND_CHATMSG);
+
+
+export const GET_IMG_URL_REQUEST = 'GET_IMG_URL_REQUEST';
+export const GET_IMG_URL_SUCCESS = 'GET_IMG_URL_SUCCESS';
+export const GET_IMG_URL_FAILURE = 'GET_IMG_URL_FAILURE';
+
+export const getImageDloadUrlReq = actionCreatorPayload(GET_IMG_URL_REQUEST);
+export const getImageDloadUrlSuccess = actionCreatorPayload(GET_IMG_URL_SUCCESS);
+export const getImageDloadUrlFailure = actionCreatorPayload(GET_IMG_URL_FAILURE);

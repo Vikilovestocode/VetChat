@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { AntDesign } from '@expo/vector-icons'; 
 import Slider from '@react-native-community/slider';
+import { Audio } from 'expo-av';
 
 export default function AudioPlayer(props) {
   const [sound, setSound] = React.useState();
@@ -17,15 +18,30 @@ export default function AudioPlayer(props) {
  
   async function playSound() {
     console.log('Loading Sound');
-    const { sound } =  await props.recording.createNewLoadedSoundAsync()
+    let soundObj;  
+    if(typeof props.recording == 'string'){
+      const {
+        sound,
+        status,
+      } = await Audio.Sound.createAsync({ uri :props.recording});
+      // Your sound is playing!
+      soundObj = sound;
+      console.log(" playsound fetch soundObj:", soundObj)
+    } else {
 
-    setSound(sound);
-
-    //  "playableDurationMillis": 8312,
-   // "positionMillis": 8312,
-    console.log('Playing Sound');
-    sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-    await sound.playAsync(); 
+      const { sound } =  await props.recording.createNewLoadedSoundAsync()
+      soundObj = sound;
+      console.log(" playsound local soundObj:", !!soundObj)
+  
+    }
+      setSound(soundObj);
+  
+      //  "playableDurationMillis": 8312,
+     // "positionMillis": 8312,
+      console.log('Playing Sound soundObj:', !!soundObj);
+      soundObj.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+      await soundObj.playAsync(); 
+    
   }
 
   React.useEffect(() => {
@@ -61,7 +77,7 @@ export default function AudioPlayer(props) {
  const progressStatus = (playBackStatus)=>{
     //  "playableDurationMillis": 8312,
    // "positionMillis": 8312,
-   console.log(' playBackStatus::::', playBackStatus)
+   console.log(' palying::::')
    const percent = playBackStatus && playBackStatus.positionMillis ? 
                 (playBackStatus.positionMillis /playBackStatus.playableDurationMillis)*100: 0;
    return percent
@@ -125,10 +141,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
   },  
   container: {
-    flex: 1,
+    // flex: 1,
     flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
+    // justifyContent: 'center',
+    // backgroundColor: '#ecf0f1',
     padding: 10,
   },
 });

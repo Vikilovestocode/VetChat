@@ -1,118 +1,82 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Text, View, Button, KeyboardAvoidingView } from 'react-native';
-import { GiftedChat } from 'react-native-gifted-chat'
+import { GiftedChat, utils, IMessage } from 'react-native-gifted-chat'
 import { Portal, Modal } from 'react-native-paper';
-import { renderInputToolbar, renderActions, renderComposer, renderSend } from '../components/InputToolBar';
+import { renderInputToolbar, renderActions, renderComposer, renderSend, renderMessageVideo, renderMessageAudio } from '../components/InputToolBar';
 import { FontAwesome } from '@expo/vector-icons'; 
-import { AUDIO_MSG_MODE } from '../constants/chatConstants';
+import { AUDIO_MSG_MODE, VIDEO_MSG_MODE, CONSULTATION } from '../constants/chatConstants';
 import AudioRecord from '../components/AudioRecord';
+import { addAudioVideo } from '../utils/browseImgVideoUtil';
+import { useDispatch, useSelector } from 'react-redux';
+import { saveChatMsgRequest, getChatMessageReq, sendChatMsg } from '../actions/consultAction';
+import { consultationImgUpload, uploadAudio, videoUpload } from '../api/consultApi';
+import ChatRenderImage from '../components/ChatRenderImage';
+
+
+function buildMsg(props, audioMsg){
+
+  const msg =  new IMessage()
+  
+  return {
+    _id: 1,
+    text: '',
+    createdAt: new Date(),
+    user: {
+      ...props.user
+    },
+    audio: audioMsg
+  }
+}
 
 export default function ChatScreen({ navigation }) {
   // 
-  const chatBotMsg = [
-    {
-      _id:  1,
-      step: 1,
-      text: `Hi, This is Lika doctors assistant. Please provide awser for the following 
-      What is the pet name?
-      `,
-      createdAt: new Date(),
-      user: {
-        _id: 2,
-        name: 'React Native',
-        avatar: 'https://placeimg.com/140/140/any',
-      },
-      isChatbotMsg: true,
-      answer: null
-    },
-    {
-      _id: 2,
-      step: 2,
-      text: 'What type of pet?',
-      createdAt: new Date(),
-      quickReplies: {
-        type: 'radio', // or 'checkbox',
-        keepIt: true,
-        values: [
-          {
-            title: 'Dog',
-            value: 'Dog',
-          },
-          {
-            title: 'Bird',
-            value: 'Bird',
-          },
-          {
-            title: 'Cat',
-            value: 'Cat',
-          },
-          {
-            title: 'Farm Animal',
-            value: 'Farm Animal',
-          },
-        ],
-      },
-      user: {
-        _id: 2,
-        name: 'React Native',
-      },
-    }
-  ]
  
-  const [messages, setMessages] = useState([ {
-    _id:  1,
-    step: 1,
-    text: `Hi, This is Lika doctors assistant. Please provide awser for the following 
 
-    What is the pet name?
-    `,
-    createdAt: new Date(),
-    user: {
-      _id: 2,
-      name: 'React Native',
-      avatar: 'https://placeimg.com/140/140/any',
-    },
-    isChatbotMsg: true,
-    isAnswerd: false,
-    received: true
-  }, {
-    _id:  2,
-    step: 1,
-    text: `Hi, Lika
-    `,
-    createdAt: new Date(),
-    user: {
-      _id: 1,
-    },
-    isChatbotMsg: true,
-    isAnswerd: false,
-    received: true
-  }]);
-  const [currentStep, setCurrentStep] = useState(1);
   const [visible, setVisible] = React.useState(false);
   const [modalMode, setModalMode] = React.useState('');
   const hideModal = ()=>(setVisible(false));
   const [audioMsg, setAudioMsg] = React.useState('');
+  const dispatch = useDispatch();
 
+  const {user, consultationObj, chatMsgs, ...consultReducer} = useSelector(({consultReducer})=>{
+    consultReducer.user = {
+      _id: 1
+    }
+    return consultReducer
+})
+ 
 
   useEffect(() => {
 
     console.log(' useEffect ')
 
-    // if(chatBotMsg.find(ele => ele.step == currentStep).answer){
-    //   console.log(' useEffect anser')
-    //   const nexStep = chatBotMsg.find(ele => ele.step == currentStep+1);
-    //   setMessages(previousMessages => GiftedChat.append(previousMessages, nexStep))
-    // }
-
+    dispatch(getChatMessageReq(consultationObj))
     
   }, [])
- 
-  const onSend = useCallback((inpMsg = []) => {
 
-    console.log(' messages ', inpMsg)
-    setMessages(previousMessages => GiftedChat.append(previousMessages, inpMsg))
-  }, [])
+  
+  const messages = chatMsgs || [];
+  console.log(' #messages--------', messages)
+  console.log(' #messages chatMsgs--------', chatMsgs)
+  const onSend = (inpMsg = []) => {
+
+    console.log(' inpMsg ', inpMsg)
+    console.log(' chatMsgs chatMsgs ', chatMsgs)
+
+    dispatch(sendChatMsg(GiftedChat.append(chatMsgs, inpMsg)))
+    dispatch(saveChatMsgRequest({ id: consultationObj.id, ...inpMsg}))
+  }
+  
+  /*useCallback((inpMsg = []) => {
+
+    console.log(' inpMsg ', inpMsg)
+    console.log(' chatMsgs chatMsgs ', chatMsgs)
+
+    // console.log(' GiftedChat.append(inpMsg, messages) ', GiftedChat.append(inpMsg, messages))
+    // console.log(' GiftedChat.append(inpMsg, messages) 22 ', GiftedChat.append(chatMsgs, inpMsg))
+    dispatch(sendChatMsg(chatMsgs.concat(inpMsg)))
+    // dispatch(saveChatMsgRequest({ id: consultationObj.id, ...inpMsg}))
+  }, [])*/
 
   const getAudioMsgComp = () =>{
     const startRecord = () => (
@@ -132,7 +96,7 @@ export default function ChatScreen({ navigation }) {
         <FontAwesome name="microphone" size={60} color="green" />
       </View>
       <View style={{ alignSelf:'center'}}>
-        <Text>Recording...</Text>
+        <Text>Recording... Tap to stop recodirng</Text>
       </View>
       </View>
     )
@@ -148,7 +112,51 @@ export default function ChatScreen({ navigation }) {
   const recordCallback =(recording)=>{
     hideModal()
     setAudioMsg(recording)
+
+    let audioMsg = {
+      _id: Math.round(Math.random() * 1000000),
+      text: '',
+      createdAt: new Date(),
+      user: user,
+      audio: recording,
+      file : recording
+    }
+
+    audioMsg.pathUrl = CONSULTATION+`/${consultationObj.id}/chat/${audioMsg._id}/audio`;
+    
+    uploadAudio({file: recording, pathUrl: CONSULTATION+`/${consultationObj.id}/chat/${audioMsg._id}/audio`})
+
+    onSend(audioMsg)
   }
+
+const addAudioVideoClbk = (mimeType, result, errmsg)=>{
+
+  console.log(' add image video call back')
+
+  let msg = {
+    _id: Math.round(Math.random() * 1000000),
+    text: '',
+    createdAt: new Date(),
+    user: user,
+  }
+
+  msg.file = result;
+  if(mimeType.includes('image')){
+    msg.image = result.uri;
+    msg.pathUrl = CONSULTATION+`/${consultationObj.id}/chat/${msg._id}/image`;
+    consultationImgUpload({file: result, pathUrl: CONSULTATION+`/${consultationObj.id}/chat/${msg._id}/image`})
+  } else if(mimeType.includes('video')){
+    msg.video = result.uri;
+    msg.file = result;
+    msg.pathUrl =  CONSULTATION+`/${consultationObj.id}/chat/${msg._id}/video`;
+    videoUpload({file: result, pathUrl: CONSULTATION+`/${consultationObj.id}/chat/${msg._id}/video`})
+  }
+  
+  onSend(msg)
+
+}
+
+
   return (
     <>
      <Portal>
@@ -160,15 +168,14 @@ export default function ChatScreen({ navigation }) {
       audioMsg={audioMsg}
       messages={messages}
       onSend={messages => onSend(messages)}
-      user={{
-        _id: 1,
-      }}
+      user={user}
       renderInputToolbar={renderInputToolbar}
       actionList={
         {
           'Choose File form': () => {
             console.log('Choose From Library');
-            setVisible(true)
+            setVisible(false)
+            addAudioVideo(addAudioVideoClbk)
           },
           'Record Audio': () => {
             console.log('Record Audio');
@@ -183,6 +190,11 @@ export default function ChatScreen({ navigation }) {
       renderActions={renderActions}
       renderComposer={renderComposer}
       renderSend={renderSend}
+      renderMessageImage={(props)=> <ChatRenderImage {...props}/>}
+      renderMessageVideo={renderMessageVideo}
+      renderMessageAudio={renderMessageAudio}
+      consultationObj={consultationObj}
+      chatUrl={`consultation/${consultationObj.id}/chat/`}
     />
     <KeyboardAvoidingView behavior="height"/>
     </ >

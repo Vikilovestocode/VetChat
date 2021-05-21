@@ -1,7 +1,7 @@
 import * as firebase from 'firebase';
 import firestore from 'firebase/firestore'
 
-const settings = {timestampsInSnapshots: true};
+const settings = {timestampsInSnapshots: true, experimentalForceLongPolling: true};
 
 let config = {
   apiKey: "AIzaSyAPZJz2Hx6y-Ct81TdKHazSI8jL-ms7ZTo",

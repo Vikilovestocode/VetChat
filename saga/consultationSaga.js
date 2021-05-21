@@ -1,10 +1,17 @@
 import * as firebase from 'firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { put, takeLatest, takeEvery, all, call } from 'redux-saga/effects';
-import { ADD_PET_REQUEST, DEL_MEDIA_REQUEST, ADD_PET_FAILURE, 
+import { ADD_PET_REQUEST, DEL_MEDIA_REQUEST, ADD_PET_FAILURE, SAVE_CHAT_MSG_REQUEST,
     ADD_MEDIA_REQUEST, addMediaSuccess, addMediaFailure,
-    addPetSuccess, addPetFailure, addMediaUploadProgress, deleteMediaSuccess, deleteMediaFailure } from '../actions/consultAction';
+    addPetSuccess, addPetFailure, addMediaUploadProgress, deleteMediaSuccess, deleteMediaFailure, saveChatMsgSuccess, saveChatMsgFailure, keepMeidaLocallyReq } from '../actions/consultAction';
 import { ADD_STEP2_REQUEST, addConsltStep2Success, addConsltStep2Failure } from '../actions/consultAction';
-import { getConsultations, saveConsultationStep1,  consultationImgUpload, deleteMedia, saveConsultationStepTwo } from '../api/consultApi';
+import { getConsultations, saveConsultationStep1,  consultationImgUpload, deleteMedia, 
+    saveConsultationStepTwo, saveConsultationChat, getConsultationObj, getMediaUrl } from '../api/consultApi';
+import { MEDIA_LOCALLY_REQUEST, keepMeidaLocallySuccess, keepMeidaLocallyFailure } from '../actions/consultAction';
+import { GET_CHATMSG_REQUEST, getChatMessageSuccess, getChatMessageFailure } from '../actions/consultAction';
+import { GET_IMG_URL_REQUEST, getImageDloadUrlSuccess, getImageDloadUrlFailure } from '../actions/consultAction';
+
+import { createFileLocallyBfrUpload } from '../utils/fileUtil';
 
 function* consultationSaga(action) {
     try{
@@ -78,4 +85,79 @@ function* deleteMediaSaga({payload}) {
 
 export function* deleteMediaWatcher() {
     yield takeEvery(DEL_MEDIA_REQUEST, deleteMediaSaga)
+}
+
+
+export function* chatMessageWatcher() {
+    yield takeEvery(SAVE_CHAT_MSG_REQUEST, saveChatMsgSaga)
+}
+
+function* saveChatMsgSaga(action) {
+    try{
+        const {id, ...chatMsgArr } =  action.payload;
+        const msg = chatMsgArr[0]? chatMsgArr[0]: chatMsgArr;
+        if(msg.audio)
+            msg.audio = msg.pathUrl;
+        if(msg.video)
+            msg.video = msg.pathUrl;   
+        console.log(' msg saga', msg)
+        const data = yield call(saveConsultationChat, id, msg)
+        yield put(saveChatMsgSuccess(data))
+        // yield put(keepMeidaLocallyReq({pathUrl: msg.pathUrl, file: msg.file}))
+    } catch(e){
+        console.log('saveChatMsgSaga: error :', e)
+        yield put(saveChatMsgFailure(e))
+    }
+}
+
+function* mediaCacheLocalSaga(action) {
+    try{
+        const { file, pathUrl } = action.payload;
+        const data = yield call(createFileLocallyBfrUpload, file, pathUrl)
+        // yield put(keepMeidaLocallySuccess(data))
+    } catch(e){
+        console.error('mediaCacheLocalSaga: error :', e)
+        console.log('mediaCacheLocalSaga: error :', e)
+        yield put(keepMeidaLocallyFailure(e))
+    }
+}
+
+export function* mediaCacheLocalWatcher() {
+    yield takeEvery(MEDIA_LOCALLY_REQUEST, mediaCacheLocalSaga)
+}
+
+function* fetchChatMessageSaga(action) {
+    try{
+        const data = yield call(getConsultationObj, action.payload.id)
+        yield put(getChatMessageSuccess(data))
+    } catch(e){
+        console.error('fetchChatMessageSaga: error :', e)
+        console.log('fetchChatMessageSaga: error :', e)
+        yield put(getChatMessageFailure(e))
+    }
+}
+
+export function* fetchChatMessageWatcher() {
+    yield takeEvery(GET_CHATMSG_REQUEST, fetchChatMessageSaga)
+}
+
+function* getImageUrlSaga(action) {
+    try{
+        console.log('getImageUrlSaga: payload before check:', action.payload, yield AsyncStorage.getItem(action.payload))
+        let data = yield AsyncStorage.getItem(action.payload)
+        if(!data){
+            data = yield call(getMediaUrl, action.payload)
+            if(data)
+                yield AsyncStorage.setItem(action.payload, data)
+        }
+        yield put(getImageDloadUrlSuccess({ pathUrl: action.payload, dloadUlr: data }))
+    } catch(e){
+        console.error('getImageDloadUrlFailure: error :', e)
+        console.log('getImageUrlSaga: error :', e)
+        yield put(getImageDloadUrlFailure(e))
+    }
+}
+
+export function* getImageUrlWatcher() {
+    yield takeEvery(GET_IMG_URL_REQUEST, getImageUrlSaga)
 }
