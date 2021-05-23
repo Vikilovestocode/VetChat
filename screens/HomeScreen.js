@@ -3,12 +3,12 @@ import { Text, View, Button } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Appbar } from 'react-native-paper';
 import { StyleSheet } from 'react-native';
-
+import { navMap } from '../navigation/navConstant';
 export default function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
 
-<Appbar style={styles.top} dark={true}>
+{/* <Appbar style={styles.top} dark={true}>
    <Appbar.Action
      icon={()=>( <FontAwesome name="bars" size={24} color="black" />)}
      onPress={() => console.log('Pressed archive')}
@@ -19,13 +19,13 @@ export default function HomeScreen({ navigation }) {
       icon="delete"
       onPress={() => console.log('Pressed delete')}
     />
-  </Appbar>
+  </Appbar> */}
 
      
       <Text>Home Screen</Text>
       <Button
         title="Consultation"
-        onPress={() => navigation.navigate('chatScreen')}
+        onPress={() => navigation.navigate(navMap.consultationStep1)}
       />
     </View>
   );

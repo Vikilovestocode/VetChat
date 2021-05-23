@@ -38,10 +38,10 @@ export default function ChatScreen({ navigation }) {
   const [audioMsg, setAudioMsg] = React.useState('');
   const dispatch = useDispatch();
 
-  const {user, consultationObj, chatMsgs, ...consultReducer} = useSelector(({consultReducer})=>{
-    consultReducer.user = {
-      _id: 1
-    }
+  const { user } = useSelector(({ authReducer })=> (authReducer))
+
+
+  const {consultationObj, chatMsgs, ...consultReducer} = useSelector(({consultReducer})=>{
     return consultReducer
 })
  
