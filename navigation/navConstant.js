@@ -3,5 +3,6 @@ export const navMap = {
     consultationStep1: "Pet Details",
     consultationStep2: "Problem Details",
     chat: "Chat",
-    signup: "Sign Up"
+    signup: "Sign Up", 
+    consultList: "Conslultation List"
 }

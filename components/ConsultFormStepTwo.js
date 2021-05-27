@@ -34,6 +34,27 @@ const validateForm = (values)=>{
 
 }
 
+
+const getInitialValues = (exiting) => {
+    const { ownerphone, owneremail,
+    problemDesc, audio, vacnationImage, problemImageVideo, problemImages, problemVideos,
+    isLaziness, isVomitting, isDiarrhoea,diarrhoeaPerDay,  vomittingPerDay} = exiting;
+
+    if (exiting)
+        return {
+            ownerphone, owneremail,
+            problemDesc, audio, vacnationImage, problemImageVideo, problemImages, problemVideos,
+            isLaziness, isVomitting, isDiarrhoea, diarrhoeaPerDay, vomittingPerDay
+        };
+    else
+        return {
+            ownerphone: '', owneremail: '',
+            problemDesc: '', audio: '', vacnationImage: '', problemImageVideo: [], problemImages: [], problemVideos: [],
+            isLaziness: '', isVomitting: '', isDiarrhoea: '', diarrhoeaPerDay: '', vomittingPerDay: ''
+        };
+}
+
+
 const audioUrl = (base)=>(`${base}/audio`)
 
 const ConsultFormStepTwo = (props) => {
@@ -46,9 +67,7 @@ const ConsultFormStepTwo = (props) => {
    
     return (
         <Formik
-            initialValues={{ ownerphone: '', owneremail: '',
-                        problemDesc: '', audio:'', vacnationImage: '', problemImageVideo: [], problemImages: [], problemVideos: [],
-                        isLaziness: '', isVomitting:'', isDiarrhoea: '',diarrhoeaPerDay: '',  vomittingPerDay: ''}}
+            initialValues={getInitialValues(consultationObj)}
             validate={validateForm}            
             onSubmit={values => {
                 // alert(JSON.stringify(values, null, 4))

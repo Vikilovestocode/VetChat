@@ -1,11 +1,11 @@
 import {ADD_PET_REQUEST, ADD_PET_SUCCESS, ADD_PET_FAILURE}  from '../actions/consultAction';
 import {ADD_MEDIA_REQUEST, ADD_MEDIA_SUCCESS, ADD_MEDIA_FAILURE, ADD_MEDIA_PROGRESS}  from '../actions/consultAction';
 import { DEL_MEDIA_SUCCESS, DEL_MEDIA_FAILURE, GET_CHATMSG_SUCCESS, SEND_CHATMSG}  from '../actions/consultAction';
-import { GET_IMG_URL_SUCCESS }  from '../actions/consultAction';
+import { GET_IMG_URL_SUCCESS, VIEW_CONSULT }  from '../actions/consultAction';
 
 // Initial State
 const initialState = {
-  consultationObj : { id : 'xJrCL8P4BUOe3f4wxO36'},
+  consultationObj : {},
   currMsgImgUlrMap: {} 
   };// Reducers (Modifies The State And Returns A New State)
   const consultReducer = (state = initialState, action) => {
@@ -88,7 +88,14 @@ const initialState = {
             return state.currMsgImgUlrMap  
         })()
       }
-     } 
+     };
+      case VIEW_CONSULT: {
+        return {
+          ...state,
+          loading: false,
+          consultationObj: action.payload
+        }
+      };
       default: {
         return state;
       }

@@ -1,10 +1,13 @@
 import { put, takeLatest, call } from 'redux-saga/effects';
 import { SIGNUP_REQUEST, signUpSuccess, signUpFailure } from '../actions/authActions';
-import { saveUser } from '../api/authApi';
+import { getUserByPhoneNo, saveUser } from '../api/authApi';
 
 function* loginSaga(action) {
   try {
-    const data = yield call(saveUser, action.payload)
+    let data = yield call(getUserByPhoneNo, action.payload)
+    if(!data){
+      data = yield call(saveUser, action.payload)
+    }
     console.error('loginSaga: signUpSuccess :', data)
     yield put(signUpSuccess(data))
   } catch (e) {

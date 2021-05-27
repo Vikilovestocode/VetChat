@@ -2,6 +2,7 @@ import React from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import ChatScreen from '../screens/ChatScreen';
+import ConsultationListScreen from '../screens/ConsultationListScreen';
 import AddPetForm from '../components/AddPetForm';
 import ConsultFormStepOne from '../components/ConsultFormStepOne';
 import ConsultFormStepTwo from '../components/ConsultFormStepTwo';
@@ -19,11 +20,12 @@ const Stack = createStackNavigator();
 
 const HomeStack = () => {
   return (
-    <Stack.Navigator initialRouteName={navMap.home}>
-              <Stack.Screen name={navMap.home} component={HomeScreen} />
-              <Stack.Screen name={navMap.consultationStep1} component={ConsultFormStepOne} />
-              <Stack.Screen name={navMap.consultationStep2} component={ConsultFormStepTwo} />
-              <Stack.Screen name={navMap.chat} component={ChatScreen} />
+    <Stack.Navigator >
+        <Stack.Screen name={navMap.signup} initialParams={ { nextScreen: navMap.home } } component={SignUpScreen} />
+        <Stack.Screen name={navMap.home} component={HomeScreen} />
+        <Stack.Screen name={navMap.consultationStep1} component={ConsultFormStepOne} />
+        <Stack.Screen name={navMap.consultationStep2} component={ConsultFormStepTwo} />
+        <Stack.Screen name={navMap.chat} component={ChatScreen} />
    </Stack.Navigator>
   )
 }
@@ -31,11 +33,12 @@ const HomeStack = () => {
 
 const ConstulitaionStack = () => {
   return (
-    <Stack.Navigator initialRouteName="Details">
-            <Stack.Screen name={navMap.home} component={HomeScreen} />
-            <Stack.Screen name={navMap.consultationStep1} component={ConsultFormStepOne} />
-            <Stack.Screen name={navMap.consultationStep2} component={ConsultFormStepTwo} />
-            <Stack.Screen name={navMap.chat} component={ChatScreen} />
+    <Stack.Navigator >
+        {/* <Stack.Screen name={navMap.signup} initialParams={ { nextScreen: navMap.home } } component={SignUpScreen} /> */}
+        <Stack.Screen name={navMap.consultList} initialParams={ { nextScreen: navMap.home } } component={ConsultationListScreen} />
+        <Stack.Screen name={navMap.consultationStep1} component={ConsultFormStepOne} />
+        <Stack.Screen name={navMap.consultationStep2} component={ConsultFormStepTwo} />
+        <Stack.Screen name={navMap.chat} component={ChatScreen} />
    </Stack.Navigator>
   )
 }
@@ -54,9 +57,9 @@ export default function NavComp(){
 
   console.log(' navigation ', user);
 
-  if(!user){
-    return ( <AuthStack />)
-  }
+  // if(!user){
+  //   return ( <AuthStack />)
+  // }
   return (
     <Tab.Navigator      
      initialRouteName="Home">

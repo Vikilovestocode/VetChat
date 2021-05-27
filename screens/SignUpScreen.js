@@ -35,13 +35,18 @@ const validateForm = (values)=>{
 
 export default function SignUpScreen(props){
 
+
   const dispatch = useDispatch();
 
   const { user } = useSelector(({ authReducer })=> (authReducer))
 
   useEffect(()=>{
-    if(user && props.navigation){
-      navigation.navigate("")
+    console.log(' SignUpScreen route.params :: -----', props.route.params)
+    console.log(' SignUpScreen props :: -----', props)
+
+
+    if(user && props.navigation && props.route.params){
+      props.navigation.navigate(props.route.params.nextScreen)
     }
 
   },[])

@@ -74,3 +74,17 @@ export const GET_IMG_URL_FAILURE = 'GET_IMG_URL_FAILURE';
 export const getImageDloadUrlReq = actionCreatorPayload(GET_IMG_URL_REQUEST);
 export const getImageDloadUrlSuccess = actionCreatorPayload(GET_IMG_URL_SUCCESS);
 export const getImageDloadUrlFailure = actionCreatorPayload(GET_IMG_URL_FAILURE);
+
+
+
+export const GET_CONSULT_REQUEST = 'GET_CONSULT_REQUEST';
+export const GET_CONSULT_SUCCESS = 'GET_CONSULT_SUCCESS';
+export const GET_CONSULT_FAILURE = 'GET_CONSULT_FAILURE';
+
+export const getConsultationsReq = actionCreatorPayload(GET_CONSULT_REQUEST);
+export const getConsultationsSuccess = actionCreatorPayload(GET_CONSULT_SUCCESS);
+export const getConsultationsFailure = actionCreatorPayload(GET_CONSULT_FAILURE);
+
+export const VIEW_CONSULT = 'VIEW_CONSULT';
+
+export const viewConsultation = actionCreatorPayload(VIEW_CONSULT);

@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { put, takeLatest, takeEvery, all, call } from 'redux-saga/effects';
 import { ADD_PET_REQUEST, DEL_MEDIA_REQUEST, ADD_PET_FAILURE, SAVE_CHAT_MSG_REQUEST,
     ADD_MEDIA_REQUEST, addMediaSuccess, addMediaFailure,
-    addPetSuccess, addPetFailure, addMediaUploadProgress, deleteMediaSuccess, deleteMediaFailure, saveChatMsgSuccess, saveChatMsgFailure, keepMeidaLocallyReq } from '../actions/consultAction';
+    addPetSuccess, addPetFailure, addMediaUploadProgress, deleteMediaSuccess, deleteMediaFailure, saveChatMsgSuccess, saveChatMsgFailure, keepMeidaLocallyReq, getConsultationsSuccess, getConsultationsFailure, GET_CONSULT_REQUEST } from '../actions/consultAction';
 import { ADD_STEP2_REQUEST, addConsltStep2Success, addConsltStep2Failure } from '../actions/consultAction';
 import { getConsultations, saveConsultationStep1,  consultationImgUpload, deleteMedia, 
     saveConsultationStepTwo, saveConsultationChat, getConsultationObj, getMediaUrl } from '../api/consultApi';
@@ -160,4 +160,21 @@ function* getImageUrlSaga(action) {
 
 export function* getImageUrlWatcher() {
     yield takeEvery(GET_IMG_URL_REQUEST, getImageUrlSaga)
+}
+
+
+
+function* getConsultationSaga(action) {
+    try{
+        const data = yield call(getConsultations, action.payload)
+        console.log('##### getConsultations #', data)
+        yield put(getConsultationsSuccess(data))
+    } catch(e){
+        console.log('getConsultationSaga',e)
+        yield put(getConsultationsFailure(e))
+    }
+}
+
+export function* getConsultationWatcher() {
+    yield takeLatest(GET_CONSULT_REQUEST, getConsultationSaga)
 }
