@@ -8,7 +8,12 @@ import * as FileSystem from 'expo-file-system';
 export async function getConsultations(userInfo){
 // .where("capital", "==", true)
     const result = [];
-    const allDocs = await firebase.firestore().collection("consultations").where('userId', '==', userInfo.id).get();
+    let allDocs;
+    if(!userInfo.isAdmin){
+       allDocs = await firebase.firestore().collection("consultations").where('userId', '==', userInfo.id).get();
+    } else {
+        allDocs = await firebase.firestore().collection("consultations").get();
+    }
     if(allDocs){
         allDocs.forEach(entity =>{
                 console.log('getConsultations data:: ', entity.data())
@@ -21,14 +26,15 @@ export async function getConsultations(userInfo){
 
 
 export async function saveConsultationStep1(payload){
-    console.log('saveConsultationStep1');
+    console.log('saveConsultationStep1 payload::', payload);
 
     const consultations = await firebase.firestore().collection("consultations").add(payload);
 
     console.log('saveConsultationStep1 #######', consultations);
 
-    return consultations
+    const snapshot = await consultations.get();
 
+    return snapshot
 
 }
 
@@ -45,9 +51,14 @@ export async function saveConsultationStepTwo(payload){
 }
 
 export async function saveConsultationChat(consultId, msg){
-    console.log('saveConsultationChat');
+    console.log('saveConsultationChat', consultId, msg);
 
-    const {file, ...message} = msg;
+    // const {file, ...message} = msg;
+    let message = msg;
+
+    if(msg.message){
+        message = msg.message;
+    }
   
     const consultation = await firebase.firestore().collection("consultations").doc(consultId).update({
         chat:  firebase.firestore.FieldValue.arrayUnion(message)
@@ -104,7 +115,7 @@ export async function getDocUrl(file){
 async function uploadMedia(file, pathUrl){
     try{
 
-        console.log('#### uploadMedia callled  ##');
+        console.log('#### uploadMedia callled  ##', pathUrl);
         const data = await getDocUrl(file);
         // Upload file and metadata to the object 'images/mountains.jpg'
         const uploadTask =  firebase.storage().ref().child(pathUrl).put(data);

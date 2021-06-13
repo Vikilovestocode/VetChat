@@ -1,28 +1,48 @@
-import {ADD_PET_REQUEST, ADD_PET_SUCCESS, ADD_PET_FAILURE}  from '../actions/consultAction';
+import {ADD_PET_REQUEST, ADD_PET_SUCCESS, ADD_PET_FAILURE,ADD_STEP2_REQUEST, ADD_STEP2_SUCCESS}  from '../actions/consultAction';
 import {ADD_MEDIA_REQUEST, ADD_MEDIA_SUCCESS, ADD_MEDIA_FAILURE, ADD_MEDIA_PROGRESS}  from '../actions/consultAction';
-import { DEL_MEDIA_SUCCESS, DEL_MEDIA_FAILURE, GET_CHATMSG_SUCCESS, SEND_CHATMSG}  from '../actions/consultAction';
+import { DEL_MEDIA_SUCCESS, DEL_MEDIA_REQUEST, DEL_MEDIA_FAILURE, GET_CHATMSG_SUCCESS, SEND_CHATMSG}  from '../actions/consultAction';
 import { GET_IMG_URL_SUCCESS, VIEW_CONSULT }  from '../actions/consultAction';
 
 // Initial State
 const initialState = {
   consultationObj : {},
-  currMsgImgUlrMap: {} 
+  currMsgImgUlrMap: {} ,
+  newconsultationObj: {}
+  //  { id: "loq3TyIJrTKZeZavnu26", userId: "CAlfN74J0xy02gE2lBfE" }
   };// Reducers (Modifies The State And Returns A New State)
   const consultReducer = (state = initialState, action) => {
     console.log(' consult reducer', action.type);
 
     switch (action.type) {    // Login
+
+      case ADD_STEP2_REQUEST:
+      case DEL_MEDIA_REQUEST:
+      case ADD_PET_REQUEST: {
+        return {
+          ...state,
+          loading: true,
+        }
+      }   
       case ADD_PET_SUCCESS: {
         return {
           ...state,
+          loading: false,
           redirectToStep2: true,
           errorFlag: false,
-          consultationObj: action.payload
+          newconsultationObj: action.payload
+        }
+      }
+      case ADD_STEP2_SUCCESS:{
+        return{
+          ...state,
+          loading: false,
+          redirectToChat: true
         }
       }
       case ADD_PET_FAILURE: {
         return {
           ...state,
+          loading: false,
           redirectToStep2: false,
           errorFlag: true
         }
@@ -37,6 +57,7 @@ const initialState = {
       case ADD_MEDIA_SUCCESS: {
         return {
           ...state,
+          loading: false,
           errorFlag: false,
           mediaTaskList: mapMediaTaskList(state, action.payload)
         }
@@ -53,6 +74,7 @@ const initialState = {
         console.log(action.type, action.payload)
         return {
           ...state,
+          loading: false,
           errorFlag: false,
           mediaTaskList: deleteMediaTaskList(state, action.payload)
         }
@@ -63,7 +85,8 @@ const initialState = {
           errorFlag: false,
           chatMsgs: 
           (function () {
-            if( action.payload.chat)
+            console.log(' chat success payload ', action.payload)
+            if( action.payload && action.payload.chat)
                return action.payload.chat.map(c => { c.createdAt = c.createdAt.toDate(); return c;}).reverse()
              else 
                 return [] 
@@ -93,7 +116,9 @@ const initialState = {
         return {
           ...state,
           loading: false,
-          consultationObj: action.payload
+          newconsultationObj: null,
+          consultationObj: action.payload.consult,
+          isEdit: action.payload.isEdit
         }
       };
       default: {

@@ -31,3 +31,24 @@ export async function saveUser(payload){
 
 
 }
+
+export async function signUp(payload){
+    console.log('signUp');
+    const email = payload.phone+'@some.com';
+    const phone = payload.phone;
+    const usercrd = await firebase.auth().createUserWithEmailAndPassword(email, phone);
+
+    console.log('signUp usercrd #######', email, phone, usercrd);
+}
+
+export async function loginUser(payload){
+    console.log('loginUser');
+    const email = payload.phone+'@some.com';
+    const phone = payload.phone;
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+
+    await firebase.auth().signInWithEmailAndPassword(email, phone)
+
+    console.log('loginUser ###current###',firebase.auth().currentUser);
+    console.log('loginUser #######', email, phone);
+}

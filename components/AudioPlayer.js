@@ -84,9 +84,9 @@ export default function AudioPlayer(props) {
  }
  
  const removeRec = ()=> {
-   dispatch(deleteMediaRequest({ pathUrl: props.uploadUrl }))
+  //  dispatch(deleteMediaRequest({ pathUrl: props.uploadUrl }))
    if (props.removeRecording)
-     props.removeRecording();
+     props.removeRecording(props.uploadUrl);
  }
 
  const millisToMinutesAndSeconds = (millis) => {
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   container: {
     // flex: 1,
     flexDirection: 'row',
-    // justifyContent: 'center',
+    justifyContent: 'center',
     // backgroundColor: '#ecf0f1',
     padding: 10,
   },

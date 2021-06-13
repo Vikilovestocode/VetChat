@@ -13,7 +13,13 @@ let config = {
   measurementId: "G-JMVY6S2TBH"
 };
 
-let app = firebase.initializeApp(config);
+// let app = firebase.initializeApp(config);
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(config);
+}else {
+  firebase.app(); // if already initialized, use that one
+}
 
 firebase.firestore().settings(settings);
 

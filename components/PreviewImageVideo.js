@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button, Card, ProgressBar, Colors } from 'react-native-paper';
 import { uploadProgress } from '../utils/uploadUtil';
 import { consultationImgUpload } from '../api/consultApi';
-
+import Lightbox from 'react-native-lightbox';
 
 export default function PreviewImageVideo(props) {
     console.log('PreviewImageVideo', props)

@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
+import { ActivityIndicator, Colors } from "react-native-paper";
 
 export default function AudioRecord(props) {
   const [recording, setRecording] = React.useState();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   async function startRecording() {
     try {
@@ -26,6 +28,7 @@ export default function AudioRecord(props) {
 
   async function stopRecording() {
     console.log('Stopping recording..');
+    setIsLoading(true);
     setRecording(undefined);
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI(); 
@@ -34,9 +37,11 @@ export default function AudioRecord(props) {
   }
     console.log('props.recordingIcon::::', props.startRecordIcon)
 
+  if(isLoading)
+      return <ActivityIndicator animating={true} size={'large'} color={Colors.indigoA700} />
 
   return (
-    <View style={(props.startRecordIcon? {}: styles.container)}>
+    <View style={(props.startRecordIcon? props.containerStyle|| {} : styles.container)}>
       { props.startRecordIcon ? (
         <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
         {(recording? <props.recordingIcon/> : <props.startRecordIcon/>)}

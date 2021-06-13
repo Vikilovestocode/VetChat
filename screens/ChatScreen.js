@@ -28,7 +28,7 @@ function buildMsg(props, audioMsg){
   }
 }
 
-export default function ChatScreen({ navigation }) {
+export default function ChatScreen({ route, navigation }) {
   // 
  
 
@@ -41,15 +41,17 @@ export default function ChatScreen({ navigation }) {
   const { user } = useSelector(({ authReducer })=> (authReducer))
 
 
-  const {consultationObj, chatMsgs, ...consultReducer} = useSelector(({consultReducer})=>{
+  const {chatMsgs, ...consultReducer} = useSelector(({consultReducer})=>{
     return consultReducer
 })
  
 
+const consultationObj = consultReducer.newconsultationObj || consultReducer.consultationObj;
+
+
   useEffect(() => {
 
-    console.log(' useEffect ')
-
+    console.log(' useEffect consultationObj:::', consultationObj)
     dispatch(getChatMessageReq(consultationObj))
     
   }, [])

@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { put, takeLatest, takeEvery, all, call } from 'redux-saga/effects';
+import { put, takeLatest, takeEvery, all, call, select } from 'redux-saga/effects';
 import { ADD_PET_REQUEST, DEL_MEDIA_REQUEST, ADD_PET_FAILURE, SAVE_CHAT_MSG_REQUEST,
     ADD_MEDIA_REQUEST, addMediaSuccess, addMediaFailure,
     addPetSuccess, addPetFailure, addMediaUploadProgress, deleteMediaSuccess, deleteMediaFailure, saveChatMsgSuccess, saveChatMsgFailure, keepMeidaLocallyReq, getConsultationsSuccess, getConsultationsFailure, GET_CONSULT_REQUEST } from '../actions/consultAction';
@@ -12,6 +12,7 @@ import { GET_CHATMSG_REQUEST, getChatMessageSuccess, getChatMessageFailure } fro
 import { GET_IMG_URL_REQUEST, getImageDloadUrlSuccess, getImageDloadUrlFailure } from '../actions/consultAction';
 
 import { createFileLocallyBfrUpload } from '../utils/fileUtil';
+import { initialChatMsg } from '../utils/chatUtils';
 
 function* consultationSaga(action) {
     try{
@@ -20,6 +21,7 @@ function* consultationSaga(action) {
         yield put(addPetSuccess(data))
     } catch(e){
         console.log('addPetFailure',e)
+        console.error(e)
         yield put(addPetFailure(e))
     }
 }
@@ -31,9 +33,17 @@ export function* consultationWatcher() {
 
 function* consultationSagaStepTwo(action) {
     try{
+        console.log(' consultationSagaStepTwo::::', action )
         const data = yield call(saveConsultationStepTwo, action.payload)
-        yield put(addConsltStep2Success(data))
+        const step1Obj = yield select(({consultReducer})=>(consultReducer.newconsultationObj))
+        console.log(' consultationSagaStepTwo:::step1Obj:', step1Obj.data() )
+        const msgList = initialChatMsg({...step1Obj.data(), ...action.payload})
+        for (const value of msgList) {
+            yield call(saveConsultationChat,  action.payload.id, value)
+        }
+        yield put(addConsltStep2Success(action.payload))
     } catch(e){
+        console.log(" error on consultationSagaStepTwo: ", e)
         yield put(addConsltStep2Failure(e))
     }
 }

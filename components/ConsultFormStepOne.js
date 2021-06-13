@@ -13,6 +13,9 @@ import { breedList } from '../constants/breedList';
 import { ModalList } from './ModalList';
 import { consultationImgUpload } from '../api/consultApi';
 import { navMap } from '../navigation/navConstant';
+import withSpinner from './WithSpinner';
+import useIsMounted from '../hooks/UseIsMounted';
+import OverlapLoading from './OverlapLoading';
 
 
 const CONSULTATION = 'consultation';
@@ -53,16 +56,17 @@ const validateForm = (values) => {
 }
 
 const getInitialValues = (exiting) => {
-    const { petName, years, months, age, sex, weight, isAdopted, breed, petImageUrl } = exiting;
+    // const { petName, years, months, age, sex, weight, isAdopted, breed, petImageUrl } = exiting;
     if (exiting)
-        return { petName, years, months, age, sex, weight, isAdopted, breed, petImageUrl };
+        return exiting;
     else
-        return { petName: '', years: '', months: '', age: '', sex: '', weight: '', isAdopted: false, breed: '', petImageUrl: '' };
+        return { petName: '', years: '', months: '', age: '', sex: '', weight: '', isAdopted: false, breed: '', petImageUrl: '', status: 'InComplete' };
 }
 
 
 const ConsultFormStepOne = (props) => {
 
+    const isMounted = useIsMounted();
     const [petProfileImg, setPetProfileImg] = React.useState(null);
 
     const dispatch = useDispatch();
@@ -80,7 +84,7 @@ const ConsultFormStepOne = (props) => {
     const showModal = () => setVisible(true);
     const hideModal = () => setVisible(false);
     const containerStyle = { backgroundColor: 'white', padding: 10 };
-
+    const { isEdit, loading } = consultReducer;
 
     return (
 
@@ -92,8 +96,10 @@ const ConsultFormStepOne = (props) => {
                 if (petProfileImg && petProfileImg.uri) {
                     values.petProfileUri = petProfileImg.uri;
                 }
-                if (!consultReducer.consultationObj)
-                    dispatch(addPetRequest(values))
+                if (!consultReducer.consultationObj){
+
+                    dispatch(addPetRequest({...values, userId: user.id, createdAt: new Date()}))
+                }
                 else
                     props.navigation.navigate(navMap.consultationStep2)
             }}>
@@ -101,11 +107,29 @@ const ConsultFormStepOne = (props) => {
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched, ...formik }) => {
 
                 React.useEffect(() => {
+                    if(!isMounted){
+                        return
+                    }
+                    const unsubscribe = props.navigation.addListener('focus', () => {
+                        if(!user)
+                            props.navigation.navigate(navMap.signup)
+                    });
+
+                    return unsubscribe;
+                }, [props.navigation]);
+
+                React.useEffect(() => {
+                    if(!isMounted){
+                        return
+                    }
                     if (consultReducer.redirectToStep2)
                         props.navigation.navigate(navMap.consultationStep2)
                 }, [consultReducer.redirectToStep2])
 
                 React.useEffect(() => {
+                    if(!isMounted){
+                        return
+                    }
                     if (consultReducer.consultationObj && !petProfileImg && !currMsgImgUlrMap[values.petImageUrl]) {
                         dispatch(getImageDloadUrlReq(values.petImageUrl))
                     }
@@ -132,10 +156,15 @@ const ConsultFormStepOne = (props) => {
                     petImgCloudUrl = { uri: currMsgImgUlrMap[values.petImageUrl] }
                 }
 
+                
+                const ViewWithSpinner = withSpinner(View);
+
                 return (
 
                     <ScrollView style={{ flex: 1 }}>
-
+                            <>
+                                <OverlapLoading isLoading={loading}/>
+                            </>
                         <Portal>
                             <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={containerStyle}>
                                 <ModalList inputList={breedList} title={'Type Breed name'} onSelect={(item) => {
@@ -145,7 +174,7 @@ const ConsultFormStepOne = (props) => {
                             </Modal>
                         </Portal>
 
-                        <View >
+                        <View isLoading={loading}>
                             <View style={styles.petavatar}>
                                 <Avatar.Image size={150} source={petProfileImg || petImgCloudUrl || dogProfile} />
                                 <Pressable onPress={pickImage}>
@@ -160,6 +189,7 @@ const ConsultFormStepOne = (props) => {
                                     onBlur={handleBlur('petName')}
                                     value={values.petName}
                                     error={errors.petName && touched.petName}
+                                    disabled={!isEdit}
                                 />
                                 {errors.petName && touched.petName ?
                                     (<Text style={{ color: 'red' }}>{errors.petName}</Text>) : null}
@@ -172,6 +202,8 @@ const ConsultFormStepOne = (props) => {
                                     status={values.sex === 'male' ? 'checked' : 'unchecked'}
                                     onPress={() => { formik.setFieldValue('sex', 'male', true) }}
                                     error={errors.sex && touched.sex}
+                                    disabled={!isEdit}
+                                    
                                 />
                                 <Text>Female</Text>
                                 <RadioButton
@@ -180,6 +212,7 @@ const ConsultFormStepOne = (props) => {
                                     status={values.sex === 'female' ? 'checked' : 'unchecked'}
                                     onPress={() => { formik.setFieldValue('sex', 'female', true) }}
                                     error={errors.sex && touched.sex}
+                                    disabled={!isEdit}
                                 />
                             </View>
                             <View style={{ paddingLeft: 10 }}>
@@ -196,6 +229,7 @@ const ConsultFormStepOne = (props) => {
                                     onBlur={handleBlur('years')}
                                     value={values.years}
                                     error={errors.years && touched.years}
+                                    disabled={!isEdit}
                                 />
                                 <TextInput
                                     style={{ width: 150 }}
@@ -206,6 +240,7 @@ const ConsultFormStepOne = (props) => {
                                     onBlur={handleBlur('months')}
                                     value={values.months}
                                     error={errors.months && touched.months}
+                                    disabled={!isEdit}
                                 />
                             </View>
                             <View style={styles.padding}>
@@ -221,22 +256,24 @@ const ConsultFormStepOne = (props) => {
                                     onBlur={handleBlur('weight')}
                                     value={values.weight}
                                     error={errors.weight && touched.weight}
+                                    disabled={!isEdit}
                                 />
                                 {errors.weight && touched.weight ?
                                     (<Text style={{ color: 'red' }}>{errors.weight}</Text>) : null}
                             </View>
                             <View style={{ padding: 10, margin: 0 }}>
-                                <Text>Is Adopted</Text>
-                                <Checkbox
-                                    status={values.isAdopted ? 'checked' : 'unchecked'}
+                                {/* <Text>Is Adopted</Text> */}
+                                <Checkbox.Item label={'Is Adopted'} disabled={!isEdit}
+                                    status={values.isAdopted ? 'checked' : ''}
                                     onPress={() => {
-                                        formik.setFieldValue('isAdopted', !values.isAdopted, true)
+                                        if(isEdit)
+                                            formik.setFieldValue('isAdopted', !values.isAdopted, true)
                                     }}
                                 />
                             </View>
                             <View style={{ padding: 10, margin: 0 }}>
                                 <Text>Breed</Text>
-                                <Pressable onPress={showModal}>
+                                <Pressable onPress={isEdit? showModal: ()=>{}} disabled={!isEdit}>
                                     <View style={styles.breed}>
                                         <Text style={{ color: 'white' }}>{values.breed && values.breed.name ? values.breed.name : "Click here to add"}</Text>
                                     </View>

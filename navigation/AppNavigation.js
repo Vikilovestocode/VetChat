@@ -12,6 +12,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { navMap } from  './navConstant';
 import SignUpScreen from '../screens/SignUpScreen';
 import { useSelector } from 'react-redux';
+import SettingScreen from '../screens/SettingScreen';
+import { AntDesign } from '@expo/vector-icons'; 
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -75,6 +77,13 @@ export default function NavComp(){
           tabBarLabel: 'Consultaion',
           tabBarIcon: ({ color, size }) => (
             <Fontisto name="stethoscope" size={24} color={color} />
+          ),
+        }}/>
+        <Tab.Screen name="Settings" component={SettingScreen}   
+      options={{
+          tabBarLabel: 'Settings',
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="setting" size={24} color={color} />
           ),
         }}/>
     </Tab.Navigator>

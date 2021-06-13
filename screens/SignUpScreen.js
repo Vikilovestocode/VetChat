@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, Button } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { signUpRequest } from '../actions/authActions';
+import { signUpRequest, loginRequest } from '../actions/authActions';
 
 function validateEmail(email) {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -44,16 +44,19 @@ export default function SignUpScreen(props){
     console.log(' SignUpScreen route.params :: -----', props.route.params)
     console.log(' SignUpScreen props :: -----', props)
 
+    console.log(' SignUpScreen user :: -----', user)
+
 
     if(user && props.navigation && props.route.params){
+      // dispatch(loginRequest())
       props.navigation.navigate(props.route.params.nextScreen)
     }
 
-  },[])
+  },[user])
 
     return (
         <Formik
-            initialValues={{ name: '', phone: '', email: '', district: '', state: '', pincode: ''}}
+            initialValues={{ name: '', phone: '', email: '', district: '', state: '', pincode: '', isAdmin: false}}
             validate={validateForm}
             onSubmit={values => {
                 console.log(values)

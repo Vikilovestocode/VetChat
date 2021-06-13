@@ -4,5 +4,7 @@ export const navMap = {
     consultationStep2: "Problem Details",
     chat: "Chat",
     signup: "Sign Up", 
-    consultList: "Conslultation List"
+    consultList: "Conslultation List",
+    consultView: "Conslultation View",
+    consultListAdmin: "Conslultations",
 }
